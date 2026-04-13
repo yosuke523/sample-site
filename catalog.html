@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>フェーズ別 AIエージェント</title>
+  <link rel="stylesheet" href="./catalog.css" />
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    const phases = [
+      { id: 'phase-proposal', label: '提案準備' },
+      { id: 'phase-meeting', label: '商談時' },
+      { id: 'phase-application', label: '申込' },
+      { id: 'phase-contract', label: '契約' },
+      { id: 'phase-delivery', label: 'デリバリー' },
+      { id: 'phase-report', label: 'レポート' },
+      { id: 'phase-billing', label: '請求' },
+      { id: 'phase-admin', label: '管理系' },
+      { id: 'phase-other', label: 'その他' }
+    ];
+
+    const agents = [
+      {
+        name: '市場・競合分析アシスタント',
+        phase: '提案準備',
+        userType: '営業',
+        updatedAt: '2026/04/12',
+        summary: '市場・競合の分析を行う',
+        bullets: ['市場トレンドを整理', '競合動向を把握', '提案前の情報収集を効率化'],
+        ctaLabel: '利用開始',
+        icon: '📊',
+        accentClass: 'accentBlue'
+      },
+      {
+        name: '提案資料検索ナビ',
+        phase: '提案準備',
+        userType: '営業',
+        updatedAt: '2026/04/10',
+        summary: '提案資料を検索する',
+        bullets: ['過去提案資料を横断検索', '参考事例を素早く確認', '資料探しの時間を短縮'],
+        ctaLabel: '資料を探す',
+        icon: '📁',
+        accentClass: 'accentBlue'
+      },
+      {
+        name: '広告提案作成アシスタント',
+        phase: '提案準備',
+        userType: '営業',
+        updatedAt: '2026/04/08',
+        summary: '広告提案の示唆出しを行う',
+        bullets: ['提案の切り口を整理', '訴求ポイントを提案', '初期案の作成を支援'],
+        ctaLabel: '提案作成',
+        icon: '💡',
+        accentClass: 'accentBlue'
+      },
+      {
+        name: '広告SIM生成エージェント',
+        phase: '商談時',
+        userType: '営業',
+        updatedAt: '2026/04/11',
+        summary: '広告配信シミュレーションを生成する',
+        bullets: ['試算結果を自動生成', '複数パターンを比較', '商談中の判断材料を可視化'],
+        ctaLabel: '商談アシスト',
+        icon: '🧮',
+        accentClass: 'accentMint'
+      },
+      {
+        name: '一撃くん',
+        phase: '商談時',
+        userType: '営業',
+        updatedAt: '2026/04/09',
+        summary: '資料をSBテンプレートに変換',
+        bullets: ['資料をテンプレートへ変換', '体裁調整の手間を削減', '提出形式へ素早く整形'],
+        ctaLabel: '変換する',
+        icon: '⚡',
+        accentClass: 'accentMint'
+      },
+      {
+        name: '申込書自動生成アシスタント',
+        phase: '申込',
+        userType: 'バックヤード',
+        updatedAt: '2026/04/12',
+        summary: '申込書を自動生成',
+        bullets: ['申込書の自動作成', '入力漏れの抑制', '作成工数を大幅削減'],
+        ctaLabel: '申込作成',
+        icon: '📝',
+        accentClass: 'accentPurple'
+      },
+      {
+        name: '営業決裁補助GPT',
+        phase: '申込',
+        userType: '営業',
+        updatedAt: '2026/04/07',
+        summary: '決裁に必要な情報整理と方法を案内',
+        bullets: ['必要情報を整理', '申請の流れを案内', '確認ポイントを明確化'],
+        ctaLabel: '決裁を確認',
+        icon: '✅',
+        accentClass: 'accentPurple'
+      },
+      {
+        name: '契約関連FAQボット',
+        phase: '契約',
+        userType: '全員',
+        updatedAt: '2026/04/06',
+        summary: '契約に関する質問に回答',
+        bullets: ['契約FAQを即時回答', '基本ルールを確認', '自己解決を支援'],
+        ctaLabel: '質問する',
+        icon: '💬',
+        accentClass: 'accentOrange'
+      },
+      {
+        name: '契約書比較チェック',
+        phase: '契約',
+        userType: 'バックヤード',
+        updatedAt: '2026/04/05',
+        summary: '契約書の差分抽出と内容チェック',
+        bullets: ['差分を自動抽出', '変更点を一覧表示', '確認漏れを防止'],
+        ctaLabel: '比較する',
+        icon: '📄',
+        accentClass: 'accentOrange'
+      },
+      {
+        name: 'セキュ丸くん',
+        phase: '契約',
+        userType: '全員',
+        updatedAt: '2026/04/04',
+        summary: 'セキュリティチェックを行う',
+        bullets: ['セキュリティ観点を整理', '申請前のセルフチェック', '確認作業を簡略化'],
+        ctaLabel: 'チェック開始',
+        icon: '🛡️',
+        accentClass: 'accentOrange'
+      },
+      {
+        name: '委託先チェックコンシェルジュ',
+        phase: 'デリバリー',
+        userType: 'バックヤード',
+        updatedAt: '2026/04/03',
+        summary: '委託先の契約状況を確認',
+        bullets: ['委託先契約の状況確認', '必要手続きの有無を把握', '運用前チェックを支援'],
+        ctaLabel: '状況を見る',
+        icon: '🔍',
+        accentClass: 'accentTeal'
+      },
+      {
+        name: '広告レポート示唆出しエージェント',
+        phase: 'レポート',
+        userType: '営業',
+        updatedAt: '2026/04/12',
+        summary: '広告レポートの分析と示唆出し',
+        bullets: ['レポートを自動分析', '改善示唆を提示', '次回施策を考えやすくする'],
+        ctaLabel: 'レポート分析',
+        icon: '📈',
+        accentClass: 'accentSky'
+      },
+      {
+        name: '請求額検索&請求内訳書作成エージェント',
+        phase: '請求',
+        userType: 'バックヤード',
+        updatedAt: '2026/04/10',
+        summary: '請求額検索と内訳書作成',
+        bullets: ['請求額を素早く検索', '内訳書作成を支援', '問い合わせ対応を効率化'],
+        ctaLabel: '請求を確認',
+        icon: '💴',
+        accentClass: 'accentGreen'
+      },
+      {
+        name: '請求FAQ GPT',
+        phase: '請求',
+        userType: '全員',
+        updatedAt: '2026/04/08',
+        summary: '請求に関する質問に回答',
+        bullets: ['請求FAQへ即時回答', '基本ルールを案内', '窓口負荷を軽減'],
+        ctaLabel: 'FAQを見る',
+        icon: '💡',
+        accentClass: 'accentGreen'
+      },
+      {
+        name: 'ポータルサイトマスター',
+        phase: '管理系',
+        userType: '全員',
+        updatedAt: '2026/04/12',
+        summary: '社内ポータルの統合窓口',
+        bullets: ['社内情報への入口を集約', '必要なリンクを一元化', '日常業務の起点になる'],
+        ctaLabel: 'ポータルへ',
+        icon: '🌐',
+        accentClass: 'accentGray'
+      },
+      {
+        name: 'ナレッジ探索アシスタント',
+        phase: 'その他',
+        userType: '全員',
+        updatedAt: '2026/04/02',
+        summary: '業務ナレッジを横断検索',
+        bullets: ['関連情報をまとめて探索', '調べものを効率化', '社内情報へのアクセスを改善'],
+        ctaLabel: '探してみる',
+        icon: '🧭',
+        accentClass: 'accentGray'
+      }
+    ];
+
+    const phaseIdMap = Object.fromEntries(phases.map((phase) => [phase.label, phase.id]));
+
+    function renderMenu() {
+      return phases.map((phase) => `
+        <a class="phaseLink" href="#${phase.id}">
+          <span class="phaseLinkBar"></span>
+          <span class="phaseLinkText">${phase.label}</span>
+        </a>
+      `).join('');
+    }
+
+    function renderCards(phaseLabel) {
+      const phaseAgents = agents.filter((agent) => agent.phase === phaseLabel);
+
+      if (phaseAgents.length === 0) {
+        return '<p class="emptyText">このフェーズのエージェントはまだ登録されていません。</p>';
+      }
+
+      return phaseAgents.map((agent) => `
+        <article class="card">
+          <div class="cardTop ${agent.accentClass}">
+            <div class="cardIcon">${agent.icon}</div>
+            <div class="cardTitleArea">
+              <h3 class="cardTitle">${agent.name}</h3>
+              <div class="cardCompany">AI Agent Catalog</div>
+            </div>
+          </div>
+
+          <div class="cardBody">
+            <div class="summaryRow">
+              <span class="summaryLabel">説明</span>
+              <p class="summaryText">${agent.summary}</p>
+            </div>
+
+            <ul class="bulletList">
+              ${agent.bullets.map((bullet) => `<li class="bulletItem">${bullet}</li>`).join('')}
+            </ul>
+          </div>
+
+          <div class="cardMeta">
+            <div class="metaBlock">
+              <span class="metaLabel">想定ユーザー</span>
+              <span class="metaValue">${agent.userType}</span>
+            </div>
+
+            <div class="metaBlock">
+              <span class="metaLabel">使用フェーズ</span>
+              <span class="metaValue">${agent.phase}</span>
+            </div>
+          </div>
+
+          <div class="cardFooter">
+            <button type="button" class="ctaButton" data-agent-name="${agent.name}">${agent.ctaLabel}</button>
+            <div class="updatedAt">最終更新日: ${agent.updatedAt}</div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function renderSections() {
+      return phases.map((phase) => `
+        <section id="${phase.id}" class="phaseSection">
+          <div class="phaseHeader">
+            <h2 class="phaseTitle">${phase.label}</h2>
+            <p class="phaseDescription">${phase.label}で活用できるAIエージェント一覧</p>
+          </div>
+          <div class="cardGrid">
+            ${renderCards(phase.label)}
+          </div>
+        </section>
+      `).join('');
+    }
+
+    function renderPage() {
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div class="catalogPage">
+          <div class="topBar">
+            <a class="backCircle" href="./index.html" aria-label="トップページへ戻る">←</a>
+            <div class="brandArea">
+              <div class="brandLogo">AI</div>
+              <div class="brandText">AI AGENT CATALOG</div>
+            </div>
+          </div>
+
+          <div class="pageHeader">
+            <h1 class="pageTitle">フェーズ別 AIエージェント</h1>
+            <p class="pageLead">
+              業務フェーズごとにAIエージェントを整理したカタログサイトです。
+              左メニューから該当フェーズへ移動し、用途に合うエージェントをすぐ見つけられます。
+            </p>
+          </div>
+
+          <div class="pageLayout">
+            <aside class="sidebar">
+              <div class="sidebarCard">
+                <h2 class="sidebarTitle">使用フェーズ</h2>
+                <nav class="phaseMenu">
+                  ${renderMenu()}
+                </nav>
+              </div>
+            </aside>
+
+            <main class="contentArea">
+              ${renderSections()}
+            </main>
+          </div>
+        </div>
+      `;
+
+      document.querySelectorAll('.ctaButton').forEach((button) => {
+        button.addEventListener('click', () => {
+          const agentName = button.getAttribute('data-agent-name');
+          alert(`「${agentName}」の起動先や詳細画面は、今後ここに接続できます。`);
+        });
+      });
+    }
+
+    renderPage();
+  </script>
+</body>
+</html>
